@@ -86,7 +86,8 @@ public class InnoRestServlet extends HttpServlet {
                 }
             }
 //            String xmlUrl = request.getScheme() + "://" + request.getServerName();
-            String xmlUrl = "https://edg-staging.epa.gov";
+            String xmlUrl = request.getScheme()+"://"+ request.getServerName()+":"+request.getServerPort();
+            log.info("print server url:"+xmlUrl);
             //String xmlUrl = "https://edg.epa.gov";
             //String xmlUrl = "http://buzzard.innovateteam.com";
             //String xmlUrl = "http://localhost:8080";
@@ -146,9 +147,13 @@ public class InnoRestServlet extends HttpServlet {
             }
             String fParm = request.getParameter("f");
             String xslParm = request.getParameter("xsl");
-            if (xslParm == null || xslParm.equals("")) {
+            
+            response.setContentType(contentType);
+            out.println(xmlIn);
+            return;            
+           /* if (xslParm == null || xslParm.equals("")) {
                 response.setContentType(contentType);
-                out.println(xmlIn);
+               // out.println(xmlIn);
                 return;
             } else {
                 log.fine("xslStyleSheets: " + xslStyleSheets.toString());
@@ -196,7 +201,7 @@ public class InnoRestServlet extends HttpServlet {
             } catch (Exception e2) {
                 log.severe("InnoRestServlet processRequest threw exception" + e2);
                 return;
-            }
+            }*/
         } finally {
             out.close();
         }

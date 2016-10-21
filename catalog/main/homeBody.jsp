@@ -1,9 +1,77 @@
-
 <% // homeBody.jsp - Home page (JSF body) %>
+<%@page import="org.json.JSONObject" %>
+<%@page import="org.json.JSONArray" %>
+<%@page import="com.esri.gpt.framework.http.HttpClientRequest" %>
 <%@taglib prefix="f" uri="http://java.sun.com/jsf/core"%>
 <%@taglib prefix="h" uri="http://java.sun.com/jsf/html"%>
 <%@taglib uri="http://www.esri.com/tags-gpt" prefix="gpt"%>
+<%@page import="com.esri.gpt.framework.util.Val"%>  
+<%
 
+String responseBody = "";
+//String site = "http://localhost:8080";
+String site = "https://edg.epa.gov";
+String featuredTab1Title = "Climate Change";
+String featuredTab2Title = "Environmental Justice";
+String featuredTab3Title = "Facility Data";
+String urlSuffix = "&start=1&max=6&f=json";
+String baseURL = "/metadata/rest/find/document?searchText=";
+String popURL = "/metadata/rest/find/document?";
+/**Climate Change URL**/
+String featuredTab1SearchStr = "sys.collection%3a%22%7b9B7778AC-DE79-287A-2A79-F05863C8A212%7d%22";
+String tab1 = site + baseURL + featuredTab1SearchStr + urlSuffix;
+/**Environmental Justice URL**/
+String featuredTab2SearchStr = "sys.collection%3a%22%7bADC0F16A-E2EB-7F86-C1FB-33CB6E726851%7d%22";
+String tab2 = site + baseURL + featuredTab2SearchStr + urlSuffix;
+/**Facility Data URL**/
+String featuredTab3SearchStr = "sys.collection%3a%22%7bD5F39F59-7647-1653-DCCF-1EE6354CE412%7d%22";
+String tab3 = site + baseURL + featuredTab3SearchStr + urlSuffix;
+/**Populat Datasets URL**/
+String popDataUrl = site + popURL + "childrenof=%7B9007D9FF-E18F-9A91-564F-5C4FF3FAB904%7D" + urlSuffix;
+
+HttpClientRequest client = new HttpClientRequest();
+
+JSONObject cliChobj=null;
+client.setUrl(tab1);
+try{
+    responseBody =  client.readResponseAsCharacters();
+    cliChobj = new JSONObject(responseBody);
+   
+   }catch(Exception e){
+    e.printStackTrace();
+}
+
+JSONObject ejobj=null;
+client.setUrl(tab2);
+try{
+    responseBody =  client.readResponseAsCharacters();
+    ejobj = new JSONObject(responseBody);
+   
+   }catch(Exception e){
+    e.printStackTrace();
+}
+
+JSONObject fDataobj=null;
+client.setUrl(tab3);
+try{
+    responseBody =  client.readResponseAsCharacters();
+    fDataobj = new JSONObject(responseBody);
+   
+   }catch(Exception e){
+    e.printStackTrace();
+}
+
+JSONObject popobj=null;
+client.setUrl(popDataUrl);
+try{
+    responseBody =  client.readResponseAsCharacters();
+    popobj = new JSONObject(responseBody);
+    
+   }catch(Exception e){
+    e.printStackTrace();
+}
+
+%>
 <f:view>
 	<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 	<!--[if IEMobile 7]><html class="iem7 no-js" lang="en" dir="ltr"><![endif]-->
@@ -21,6 +89,7 @@
 		src="../../catalog/js/jquery-ui/js/jquery.js"></script>
 	<script type="text/javascript"
 		src="../../catalog/js/jquery-ui/js/jquery-ui.js"></script>
+		
 	<head>
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -66,7 +135,6 @@
 
 
 <!-- CSS -->
-
 <link rel="stylesheet" href="../skins/themes/blue/css/bootstrap.min.css">
 <link rel="stylesheet"
 	href="../skins/themes/blue/css/font-awesome.min.css">
@@ -131,6 +199,11 @@
     });
 
 });
+
+$(document).ready(function(){
+    $('[data-toggle="tooltip"]').tooltip();
+});
+
 </script>
 	
 </f:verbatim>
@@ -182,11 +255,12 @@
 			<div id="block-pane-epa-web-area-connect"
 				class="block block-pane contextual-links-region">
 				<ul class="menu utility-menu">
-					<li class="menu-item"><a href="{CONTACT URL}"
+					<li class="menu-item"><a href="../identity/feedback.page"
 						class="menu-link contact-us">Contact Us</a></li>
 				</ul>
 			</div>
 		</div>
+			
 		<div class="main-column clearfix">
 			<!--googleon: all-->
 			<%-- <h1 class="page-title"></h1> --%>
@@ -210,11 +284,12 @@
 										<div class="app-showcase wow fadeInDown" data-wow-delay=".5s">
 											<h:form id="hpFrmSearch"
 												onkeypress="javascript:hpSubmitForm(event,this);">
-												<h:inputText id="itxFilterKeywordText"
+												<h:inputText id="itxFilterKeywordText" 
 													styleClass="search-field form-control"
 													onkeypress="if (event.keyCode == 13) return false;"
 													value="#{SearchFilterKeyword.searchText}" />
-
+                                                <h:inputHidden id="start" value="1" />
+												<h:inputHidden id="max" value="10" />
 												<h:commandLink id="btnDoSearch"
 													value="#{gptMsg['catalog.search.search.advBtnSearch']}"
 													action="#{SearchController.getNavigationOutcome}"
@@ -233,9 +308,14 @@
 
 								<div class="col-md-3 col-sm-6">
 									<p>
-										<i class="fa fa-binoculars fa-2x"></i> <a href="https://edg-staging.epa.gov/metadata/catalog/search/browse/browse.page">Browse
-											the EDG</a> <br /> <i class="fa fa-bar-chart fa-2x"></i><a
-											href="https://edg-staging.epa.gov/metrics/"> Metrics</a>
+										<a href="../search/browse/browse.page">
+                                        <i class="fa fa-binoculars fa-2x"></i> Browse the EDG</a> </p> 
+                                    <p>
+                                        <a href="/metrics/"> 
+                                        <i class="fa fa-bar-chart fa-2x"></i> Metrics</a> </p>
+                                    <p>
+                                        <a href="../../webhelp/en/gptlv10/inno/Stewards/Stewards.html">
+                                        <i class="fa fa-users fa-2x"></i> Stewards</a>
 									</p>
 
 								</div>
@@ -286,7 +366,22 @@
 					  } else {
 					    return true;
 					  }
-					}</script></f:verbatim>
+					}
+				function executeSearchAction(searchText){
+				    searchText=decodeURIComponent(searchText);
+					var textEle=document.getElementById('hpFrmSearch:itxFilterKeywordText');
+					var startEle=document.getElementById('hpFrmSearch:start');
+					var maxEle=document.getElementById('hpFrmSearch:max');
+					textEle.value=searchText;
+					/*start and max values will vary*/
+					startEle.value="7";
+					maxEle.value="100";
+					var searchButtonId = "hpFrmSearch:btnDoSearch";
+					var searchButton = document.getElementById(searchButtonId);
+					searchButton.click();
+					   
+				}
+				</script></f:verbatim>
 
 
 
@@ -308,8 +403,186 @@
 							</div>
 						</div>
 
+						<div class="container">
+							<h2>Featured Data Products</h2>
+							<ul class="nav nav-tabs">
+								<li class="active"><a data-toggle="tab"
+									href="#climateChange"><%=featuredTab1Title%></a></li>
+								<li><a data-toggle="tab" href="#envJustice"><%=featuredTab2Title%></a></li>
+								<li><a data-toggle="tab" href="#facData"><%=featuredTab3Title%></a></li>
+							</ul>
 
-						<section id="service">
+							<div class="tab-content">
+
+								<div id="climateChange" class="tab-pane fade in active">
+									<div class="row" style="padding-top: 22px">
+										<%
+											try {
+
+													JSONArray arr = cliChobj.getJSONArray("records");
+													int counter = 0;
+													for (int i = 0; i < arr.length(); i++) {
+														JSONObject record = arr.getJSONObject(i);
+														JSONArray links = record.getJSONArray("links");
+														String title = record.getString("title");
+														String uuid = record.getString("id");
+														if (counter == 6) {
+															break;
+														}
+														String hrefDet="../skins/themes/blue/images/generalicon100x120.png";
+														for (int j = 0; j < links.length(); j++) {
+
+															JSONObject details = links.getJSONObject(j);
+															String typeDet = details.getString("type");
+
+															if ("thumbnail".equalsIgnoreCase(typeDet)) {
+																hrefDet = details.getString("href");
+															}
+														}
+														counter++;
+										%>
+										<a
+											href="https://edg.epa.gov/metadata/catalog/search/resource/details.page?uuid=<%=uuid%>"
+											target="_blank">
+											<div class="col-md-2">
+												<div class="thumbnail">
+													<img src="<%=hrefDet%>" data-toggle="tooltip" alt="" title="<%=title%>">
+													<div class="caption" style="word-wrap: break-word; font-size:14px;"><%=title%></div>
+												</div>
+											</div>
+										</a>
+										<%
+										}
+
+												} catch (Exception e) {
+													System.out.println("print catch:" + e);
+												}
+										%>
+						
+									</div>
+									<div class="col-md-12 col-sm-12 text-right">
+										<p>
+											<a href="javascript: void(0)" onclick="javascript:executeSearchAction('<%=featuredTab1SearchStr%>')">See More</a>
+										</p>
+										<p></p>
+									</div>
+								</div>
+
+								<div id="envJustice" class="tab-pane fade">
+									<div class="row" style="padding-top: 22px">
+										<%
+											try {
+
+													JSONArray arr = ejobj.getJSONArray("records");
+													int counter = 0;
+													for (int i = 0; i < arr.length(); i++) {
+														JSONObject record = arr.getJSONObject(i);
+														JSONArray links = record.getJSONArray("links");
+														String title = record.getString("title");
+														String uuid = record.getString("id");
+														if (counter == 6) {
+															break;
+														}
+														String hrefDet="../skins/themes/blue/images/generalicon100x120.png";
+														for (int j = 0; j < links.length(); j++) {
+
+															JSONObject details = links.getJSONObject(j);
+															String typeDet = details.getString("type");
+
+															if ("thumbnail".equalsIgnoreCase(typeDet)) {
+																hrefDet = details.getString("href");
+															}
+														}
+														counter++;
+										%>
+										<a
+											href="https://edg.epa.gov/metadata/catalog/search/resource/details.page?uuid=<%=uuid%>"
+											target="_blank">
+											<div class="col-md-2">
+												<div class="thumbnail">
+													<img src="<%=hrefDet%>" data-toggle="tooltip" alt="" title="<%=title%>">
+													<div class="caption" style="word-wrap: break-word; font-size:14px;"><%=title%></div>
+												</div>
+											</div>
+										</a>
+										<%
+										}
+
+												} catch (Exception e) {
+													System.out.println("print catch:" + e);
+												}
+										%>
+						
+									</div>
+									<div class="col-md-12 col-sm-12 text-right">
+										<p>
+											<a href="javascript: void(0)" onclick="javascript:executeSearchAction('<%=featuredTab2SearchStr%>')">See More</a>
+										</p>
+										<p></p>
+									</div>
+								</div>
+							
+								<div id="facData" class="tab-pane fade">
+		                        <div class="row" style="padding-top: 22px">
+										<%
+											try {
+
+													JSONArray arr = fDataobj.getJSONArray("records");
+													int counter = 0;
+													for (int i = 0; i < arr.length(); i++) {
+														JSONObject record = arr.getJSONObject(i);
+														JSONArray links = record.getJSONArray("links");
+														String title = record.getString("title");
+														String uuid = record.getString("id");
+														if (counter == 6) {
+															break;
+														}
+														String hrefDet="../skins/themes/blue/images/generalicon100x120.png";
+														for (int j = 0; j < links.length(); j++) {
+
+															JSONObject details = links.getJSONObject(j);
+															String typeDet = details.getString("type");
+
+															if ("thumbnail".equalsIgnoreCase(typeDet)) {
+																hrefDet = details.getString("href");
+															}
+														}
+														counter++;
+										%>
+										<a
+											href="https://edg.epa.gov/metadata/catalog/search/resource/details.page?uuid=<%=uuid%>"
+											target="_blank">
+											<div class="col-md-2">
+												<div class="thumbnail">
+													<img src="<%=hrefDet%>" data-toggle="tooltip" alt="" title="<%=title%>">
+													<div class="caption" style="word-wrap: break-word; font-size:14px;"><%=title%></div>
+												</div>
+											</div>
+										</a>
+										<%
+										}
+
+												} catch (Exception e) {
+													System.out.println("print catch:" + e);
+												}
+										%>
+						
+									</div>
+									<div class="col-md-12 col-sm-12 text-right">
+										<p>
+											<a href="javascript: void(0)" onclick="javascript:executeSearchAction('<%=featuredTab3SearchStr%>')">See More</a>
+										</p>
+										<p></p>
+									</div>
+								</div>
+									</div>
+								</div>
+
+							</div>
+						</div>
+					</div>
+
+	<%-- 					<section id="service">
 							<div class="container">
 								<div class="row">
 									<div class="col-md-12">
@@ -351,15 +624,69 @@
 									</div>
 								</div>
 							</div>
-						</section>
+						</section> --%>
+				<div class="container">
+						<h2>Popular Datasets</h2>
+									<div class="row" style="padding-top: 22px">
+										<%
+											try {
 
+													JSONArray arr = popobj.getJSONArray("records");
+													int counter = 0;
+													for (int i = 0; i < arr.length(); i++) {
+														JSONObject record = arr.getJSONObject(i);
+														JSONArray links = record.getJSONArray("links");
+														String title = record.getString("title");
+														String uuid = record.getString("id");
+														if (counter == 6) {
+															break;
+														}
+														String hrefDet="../skins/themes/blue/images/generalicon100x120.png";
+														for (int j = 0; j < links.length(); j++) {
 
+															JSONObject details = links.getJSONObject(j);
+															String typeDet = details.getString("type");
+
+															if ("thumbnail".equalsIgnoreCase(typeDet)) {
+																hrefDet = details.getString("href");
+															}
+														}
+														counter++;
+										%>
+										<a
+											href="https://edg.epa.gov/metadata/catalog/search/resource/details.page?uuid=<%=uuid%>"
+											target="_blank">
+											<div class="col-md-2">
+												<div class="thumbnail">
+													<img src="<%=hrefDet%>" data-toggle="tooltip" alt="" title="<%=title%>">
+													<div class="caption" style="word-wrap: break-word; font-size:14px;"><%=title%></div>
+												</div>
+											</div>
+										</a>
+										<%
+										}
+
+												} catch (Exception e) {
+													System.out.println("print catch:" + e);
+												}
+										%>
+						
+									</div>
+												<div class="col-md-12 col-sm-12 text-right">
+										<p>
+											<a href="javascript: void(0)" onclick="javascript:executeSearchAction('Environmental Dataset Gateway GeoRSS')">See More</a>
+										</p>
+										<p></p>
+									</div>
+									</div> 
+									
+												
 						<section id="feature">
 							<div class="container">
 								<div class="row">
 									<div class="col-md-12">
 										<div class="title wow pulse" data-wow-delay=".5s">
-											<h2>Popular Information Resources</h2>
+											<h2>Learn More</h2>
 											<p>Links to the most popular information in the EDG</p>
 										</div>
 									</div>
@@ -373,14 +700,9 @@
 												<div class="media-body">
 													<h4 class="media-heading">Download Data</h4>
 													<ul>
-														<li>EPA Data download site</li>
-														<li>Clip and Ship</li>
-														<li><a
-															href="https://edg.epa.gov/metadata/webhelp/en/gptlv10/inno/EDG_ClipAndShip_procedures.pdf">How
-																to post to the EDG clip and Ship</a></li>
-														<li><a
-															href="https://edg.epa.gov/metadata/webhelp/en/gptlv10/inno/EDG_Download_Locations.pdf">How
-																to post to the EDG download sites</a></li>
+														<li><a href="/data/" target='_blank'>EPA Data Download Site</a></li>
+														<li><a href="/clipship/" target='_blank'>Clip and Ship</a></li>
+                                                        <li><a href="ftp://newftp.epa.gov/EPADataCommons/" target='_blank'>EPA Data Commons FTP Site</a></li>
 													</ul>
 												</div>
 											</div>
@@ -390,56 +712,45 @@
 												<div class="media-body">
 													<h4 class="media-heading">Metadata Publishing</h4>
 													<ul>
-														<li>Link to Administration functions (sign in needed)</li>
-														<li>Link to collections function (sign in needed)</li>
-														<li><a href="https://edg.epa.gov/EME/">EPA
+														<li><a href="/EME/">EPA
 																Metadata Editor</a></li>
 														<li><a
-															href="https://edg.epa.gov/metadata/webhelp/en/gptlv10/inno/EDG_GettingStarted.pdf">Quick
+															href="../../webhelp/en/gptlv10/inno/EDG_GettingStarted.pdf">Quick
 																start guide for publishing metadata</a></li>
 														<li><a
-															href="https://edg.epa.gov/metadata/webhelp/en/gptlv10/inno/EDG_Metadata_Recommendations.pdf">EPA
+															href="../../webhelp/en/gptlv10/inno/EDG_Metadata_Recommendations.pdf">EPA
 																Recommendations for Metadata Documentation</a></li>
 														<li><a
 															href="https://www2.epa.gov/geospatial/epa-geospatial-metadata-technical-specification">Geospatial
 																Metadata Technical Specifications</a></li>
 														<li><a
-															href="https://edg.epa.gov/metadata/webhelp/en/gptlv10/inno/GenericMetadataGuide.pdf">Metadata
+															href="../../webhelp/en/gptlv10/inno/GenericMetadataGuide.pdf">Metadata
 																Style Guide</a></li>
 														<li><a
 															href="https://project-open-data.cio.gov/schema/">Project
 																Open Data Metadata Schema</a></li>
+														
+														<li><a href="/metadata/webhelp/en/gptlv10/inno/EDG_ClipAndShip_procedures.pdf" target = "_blank">
+																How to Post Data to EDG Clip N Ship (PDF)</a></li>
+																
+														<li><a href="/metadata/webhelp/en/gptlv10/inno/EDG_Download_Locations.pdf" target = "_blank">
+														How to Post Data to EDG Download Sites (PDF)</a></li>
+														
+														<li><a href="/metadata/webhelp/en/gptlv10/inno/Stewards/Stewards.html" target = "_blank">
+														List of EDG Stewards (opens new window)</a></li>		
+														
 													</ul>
 												</div>
 											</div>
-											<div class="media wow fadeInDown" data-wow-delay="1.1s">
+                                            <div class="media wow fadeInDown" data-wow-delay="1.4s">
 												<img class="media-object pull-left"
-													src="../skins/themes/blue/images/item-3.png" alt="Image">
+													src="../skins/themes/blue/images/item-4.png" alt="Image">
 												<div class="media-body">
-													<h4 class="media-heading">Training and More</h4>
+													<h4 class="media-heading">Geospatial Program</h4>
 													<ul>
-														<li><a
-															href="https://edg.epa.gov/metadata/webhelp/en/gptlv10/inno/EDG_GettingStarted.pdf">How
-																to get started publishing metadata to the EDG</a></li>
-														<li>Search and discovery</li>
-														<li><a
-															href="https://edg.epa.gov/metadata/webhelp/en/gptlv10/inno/EDG_FactSheet.pdf">EDG
-																fact sheet</a></li>
-														<li><a
-															href="https://edg.epa.gov/metadata/webhelp/en/gptlv10/inno/EDG_ClipAndShip_procedures.pdf">How
-																to post to the EDG clip and Ship</a></li>
-														<li><a
-															href="https://edg.epa.gov/metadata/webhelp/en/gptlv10/inno/EDG_Download_Locations.pdf">How
-																to post to the EDG download sites</a></li>
-														<li>Capturing and Using RSS Feeds from the EDG</li>
-														<ul>
-															<li><a
-																href="https://edg-staging.epa.gov/metadata/webhelp/en/gptlv10/index.html#/Welcome_to_the_EPA_Environmental_Dataset_Server_Help/00t00000001z000000/">EDG
-																	Help Feature</a></li>
-														</ul>
-														<li><a
-															href="https://edg.epa.gov/metadata/webhelp/en/gptlv10/inno/EDG_Metadata_Recommendations.pdf">EPA
-																Recommendations for Metadata Documentation</a></li>
+														<li><a href="https://www.epa.gov/geospatial">EPA Geospatial Program</a></li>
+														<li><a href="https://epa.maps.arcgis.com/home/gallery.html#c=organization&o=numviews">EPA GeoPlatform Online</a></li>
+                                                        <li><a href="https://www.geoplatform.gov/">Federal GeoPlatform</a></li>
 													</ul>
 												</div>
 											</div>
@@ -449,14 +760,18 @@
 
 									<div class="col-md-6 col-sm-6">
 										<div class="block">
-											<div class="media wow fadeInDown" data-wow-delay="1.4s">
+											<div class="media wow fadeInDown" data-wow-delay="1.1s">
 												<img class="media-object pull-left"
-													src="../skins/themes/blue/images/item-4.png" alt="Image">
+													src="../skins/themes/blue/images/item-3.png" alt="Image">
 												<div class="media-body">
-													<h4 class="media-heading">Geospatial Program</h4>
+													<h4 class="media-heading">Training and More</h4>
 													<ul>
-														<li>Link to GeoPlatform</li>
-														<li>Link to public geo page</li>
+                                                        <li><a href="../../webhelp/en/gptlv10/index.html#/How_to_Login_and_Manage_my_Password/00t000000023000000/" target="_blank">Get Help Logging In </a></li>
+                                                        <li><a href="../../webhelp/en/gptlv10/inno/EDGSearchandDiscovery101Webinar_1.wmv" target = "_blank">EDG Search and Discovery Video 1 (Homepage Overview) (WMV)</a> <a href="../../webhelp/en/gptlv10/inno/SearchandDiscovery101Video1_Agenda.pdf" target = "_blank">Video Agenda</a> <a href="../../webhelp/en/gptlv10/inno/EDGSearchandDiscovery101Presentation1_HomepageWalkThrough.pdf" target = "_blank">Slides (PDF)<a/></li>
+                                                        <li><a href="../../webhelp/en/gptlv10/inno/EDGSearchandDiscovery101Webinar_2.wmv" target = "_blank">EDG Search and Discovery Video 2 (Advanced Search) (WMV)</a> <a href="../../webhelp/en/gptlv10/inno/SearchandDiscovery101Video2_Agenda.pdf" target = "_blank">Video Agenda</a> <a href="../../webhelp/en/gptlv10/inno/EDGSearchandDiscovery101Presentation2_AdvancedSearch.pdf" target = "_blank">Slides (PDF)<a/></li>
+                                                        <li><a href="../../webhelp/en/gptlv10/inno/EDGSearchandDiscovery101Webinar_3.wmv" target = "_blank">EDG Search and Discovery Video 3 (Search Results) (WMV)</a> &nbsp;<a href="../../webhelp/en/gptlv10/inno/SearchandDiscovery101Video3_Agenda.pdf" target = "_blank">Video Agenda</a> &nbsp;<a href="../../webhelp/en/gptlv10/inno/EDGSearchandDiscovery101Presentation3_SearchResults.pdf" target = "_blank">Slides (PDF)<a/></li>
+                                                        <li><a href="../../webhelp/en/gptlv10/inno/EDG_RSS_Feed_procedures.pdf" target = "_blank">How to Capture and Use RSS Feeds from EDG (PDF)</a> </li> 
+                                                        <li><a href="../../webhelp/en/gptlv10/inno/EDG_Reuse.pdf" target = "_blank">How to Get Started with EDG Reuse (PDF) </a> </li>
 													</ul>
 												</div>
 											</div>
@@ -466,16 +781,11 @@
 												<div class="media-body">
 													<h4 class="media-heading">Developer Resources</h4>
 													<ul>
-														<li>EDG REST Interface</li>
-														<li>EDG Search Widget</li>
-														<li>EDG CS-W Interface</li>
-														<li><a
-															href="https://edg.epa.gov/metadata/webhelp/en/gptlv10/inno/EDG_RSS_Feed_procedures.pdf">Capturing
-																and Using RSS Feeds from the EDG</a></li>
-														<li>How to get started with EDG Reuse Components</li>
-														<li><a href="https://developer.epa.gov">Developer
-																Central</a></li>
-														<li>Link to RCS</li>
+														<li><a href="../../webhelp/en/gptlv10/index.html#/Catalog_Service/00t00000004m000000/" target = "_blank">EDG REST Interface</a></li>
+														<li><a href="../../webhelp/en/gptlv10/inno/EDG_Reuse.pdf" target = "_blank">EDG Search Widget</a></li>
+														<li><a href="../../webhelp/en/gptlv10/index.html#/Catalog_Service/00t00000004m000000/" target = "_blank">EDG CS-W Interface</a></li>
+														<li><a href="https://developer.epa.gov" target = "_blank">EPA's Developer Central</a></li>
+														<li><a href="https://www.epa.gov/sor/">EPA's System of Registries</a></li>
 													</ul>
 												</div>
 											</div>
@@ -485,12 +795,13 @@
 												<div class="media-body">
 													<h4 class="media-heading">Open Data</h4>
 													<ul>
-														<li>Data.gov link</li>
-														<li><a href="https://project-open-data.cio.gov/">Project
+														<li><a href="https://www.data.gov/">U.S. Government's Open Data Site: Data.gov</a></li>
+														<li><a href="https://project-open-data.cio.gov/">Federal Open Data Policy: Project
 																Open Data</a></li>
 														<li><a
 															href="https://project-open-data.cio.gov/schema/">Project
 																Open Data Metadata Schema</a></li>
+                                                        <li><a href="https://www.epa.gov/open/digital-strategy">EPA Digital Strategy for Open Data</a></li>
 													</ul>
 												</div>
 											</div>
@@ -503,7 +814,7 @@
 
 
 
-						<section id="testimonial">
+						<%-- <section id="testimonial">
 							<div class="container">
 								<div class="row">
 									<div class="col-md-12">
@@ -528,7 +839,7 @@
 									</div>
 								</div>
 							</div>
-						</section>
+						</section> --%>
 
 						<a href="#" class="scrollup">Top</a>
 
@@ -549,13 +860,13 @@
 						id="mainHome" action="catalog.main.home"
 						value="#{gptMsg['catalog.main.home.menuCaption']}"
 						styleClass="menu-link" /></li>
-				<li class="menu-item" id="menu-scitech" role="presentation">
-					<%-- styleClass="#{PageContext.tabStyleMap['catalog.content.about']}" --%>
+			<%-- 	<li class="menu-item" id="menu-scitech" role="presentation">
+					styleClass="#{PageContext.tabStyleMap['catalog.content.about']}"
 					<h:commandLink id="contentAbout" action="catalog.content.about"
 						value="#{gptMsg['catalog.content.about.menuCaption']}"
 						styleClass="menu-link" title="About the EDG" />
 
-				</li>
+				</li> --%>
 				<li class="menu-item" id="menu-lawsregs" role="presentation"><h:commandLink
 						id="searchHome" action="catalog.search.home"
 						value="#{gptMsg['catalog.search.home.menuCaption']}"
@@ -576,10 +887,24 @@
 						id="resources" action="catalog.resources.home"
 						value="#{gptMsg['catalog.resources.home.menuCaption']}"
 						styleClass="menu-link" title="Resources" /></li>
-
-			</ul>
+				<h:panelGroup rendered="#{PageContext.roleMap['gptPublisher']}">
+			    <li class="menu-item" id="menu-about" role="presentation"><h:commandLink 
+                        id="publicationManageMetadata"
+                        action="catalog.publication.manageMetadata" 
+                        styleClass="menu-link"
+                        value="#{gptMsg['catalog.publication.manageMetadata.menuCaption']}"
+                        rendered="#{PageContext.roleMap['gptPublisher']}"
+                        actionListener="#{ManageMetadataController.processAction}" /></li>
+                <li class="menu-item" id="menu-about" role="presentation"><h:commandLink
+                        id="collection" 
+                        action="catalog.collection.home"
+                        value="#{gptMsg['catalog.collection.home.menuCaption']}"
+                        styleClass="menu-link"
+                        rendered="#{PageContext.roleMap['gptPublisher']}"/></li></h:panelGroup>
+		</ul>
 		</nav>
 	</h:form>
+
 	<f:verbatim>
 	<script type="text/javascript">
 	function openHelp(sTitle, sKey) {
@@ -633,6 +958,18 @@
 						styleClass="menu-link"
 						rendered="#{PageContext.roleMap['anonymous'] && PageContext.identitySupport.supportsLogin}" />
 				</li>
+				<li><h:commandLink id="msgAuthenticatedUser"
+						rendered="#{not PageContext.roleMap['anonymous']}"
+						value="#{PageContext.welcomeMessage}" styleClass="menu-link" /></li>
+				<li><h:commandLink id="msgNonAuthenticatedUser"
+						rendered="#{PageContext.roleMap['anonymous']}"
+						value="#{gptMsg['catalog.site.anonymous']}" styleClass="menu-link"/></li>
+				<li><h:commandLink action="catalog.identity.logout"
+		                id="identityLogoutAE" styleClass="menu-link"
+		                rendered="#{not PageContext.roleMap['anonymous'] && PageContext.identitySupport.supportsLogout}">
+		                <h:outputText value="#{gptMsg['catalog.identity.logout.menuCaption']}" /></h:commandLink>
+	                    </li>
+	                
 				<li><h:outputLink value="#"
 						id="openHelp" onclick="javascript:mainOpenPageHelp()"
 						styleClass="menu-link">
@@ -644,9 +981,13 @@
 						onclick="window.open('https://developer.epa.gov/forums/forum/dataset-qa/', 'ShareYourFeedback')">
 						<h:outputText value="#{gptMsg['catalog.shareFeedback']}" />
 					</h:outputLink></div></li>
+				
 			</ul>
 		</nav>
+		
 	</h:form>
+	                  
+        
 	<footer class="main-footer clearfix" role="contentinfo">
 		<div class="region-footer">
 			<div id="block-epa-core-footer" class="block block-epa-core">
@@ -659,7 +1000,7 @@
 									and Security Notice</a></li>
 							<li><a href="https://www2.epa.gov/accessibility">Accessibility</a></li>
 						</ul>
-						<p class="last-updated">{LAST UPDATED DATE}</p>
+						<!-- <p class="last-updated">{LAST UPDATED DATE}</p> -->
 					</div>
 					<div class="col size-3of5">
 						<ul class="menu epa-menu">

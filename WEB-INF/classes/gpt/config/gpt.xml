@@ -1,4 +1,5 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
+
 <!--
     See the NOTICE file distributed with
     this work for additional information regarding copyright ownership.
@@ -14,7 +15,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<gptConfig version="1.2.6">
+<gptConfig version="1.2.7">
 
     <databaseReference name="gpt" jndiName="jdbc/gptlv10"/>
     
@@ -53,13 +54,14 @@
         - locatorSingleFieldParameter: field for the GeocodeServer service upon which locations can be searched 
     -->
     
-    <interactiveMap
-        jsapiUrl="https://serverapi.arcgisonline.com/jsapi/arcgis/?v=2.5"
-        mapServiceUrl="https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer"
+      <interactiveMap
+        jsapiUrl="//js.arcgis.com/3.17/"
+        mapServiceUrl="//services.arcgisonline.com/arcgis/rest/services/ESRI_StreetMap_World_2D/MapServer"
         mapServiceType="dynamic" 
-        geometryServiceUrl="https://tasks.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer"
-        locatorUrl="https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer"
-        locatorSingleFieldParameter = "singleLine"/>
+        geometryServiceUrl="//tasks.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer"
+        locatorUrl="//geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer"
+        locatorSingleFieldParameter = "Address"/>
+
   
     <catalog gptTablePrefix="GPT_">       
     <!-- Lucene configuration.
@@ -101,7 +103,7 @@
         - lucene.remoteWriterUrl:
 			the URL to be used when indexing documents remotely
     -->      
-    <parameter key="lucene.alwaysStoreXmlInIndex" value="false"/>
+    <parameter key="lucene.alwaysStoreXmlInIndex" value="true"/>
     <parameter key="lucene.force.isPartOf" value=""/>
     <parameter key="lucene.useSingleSearcher" value="true"/>
     <parameter key="lucene.useSingleWriter" value="true"/>
@@ -169,7 +171,7 @@
 		- allowExternalSiteSearch: Flag enabling federated search
     -->   
         
-    <search
+        <search
         searchTimeoutMillisecs="10000"
         distributedSearchTimeoutMillisecs="5000"
         distributedSearchMaxSelectedSites="5"
@@ -222,7 +224,7 @@
                 <parameter key="profileId" 
                     value="urn:esri:gpt:HTTP:JSON:ESRI:AGSONLINE" /> 
             </repository>
-            <repository
+            <!-- repository
                  key="dataGov"
                  class="com.esri.gpt.catalog.search.SearchEngineExternalCsw"
                  labelResourceKey="catalog.search.searchSite.dataGov"
@@ -232,8 +234,8 @@
                     value="urn:ogc:CSW:2.0.2:HTTP:APISO:pycsw" /> 
                 <parameter key="url" 
                     value="http://catalog.data.gov/csw?service=CSW&amp;version=2.0.2&amp;request=GetCapabilities" /> 
-            </repository>
-            <repository
+            repository -->
+            <!-- repository
                  key="geodab"
                  class="com.esri.gpt.catalog.search.SearchEngineExternalCsw"
                  labelResourceKey="catalog.search.searchSite.geoDab"
@@ -243,7 +245,7 @@
                     value="urn:ogc:CSW:2.0.2:HTTP:APISO:GICAT" /> 
                 <parameter key="url" 
                     value="http://production.geodab.eu/gi-cat-StP/services/cswiso?request=GetCapabilities&amp;service=CSW&amp;version=2.0.2" /> 
-            </repository>
+            repository -->
 
             <!-- For the registered CS-W repositories flagged for viewing in federated search -->
             <repository key="*" 
@@ -345,6 +347,16 @@
         <parameter key="webharvester.policy.class" value="com.esri.gpt.control.webharvest.engine.SimpleHarvestPolicy"/>
         <parameter key="webharvester.policy.simple.frequency" value="1"/>
         <parameter key="webharvester.agp2agp.maxItems" value="2000"/>
+        
+                <!-- Robot parameters.
+            - bot.robotstxt.enabled: use of robots.txt during harvesting is enabled. Default: true
+            - bot.robotstxt.override:  allows user to override bot.robotstxt.enabled. Default: true;
+            - bot.agent: name of the user agent for interpreting content of robots.txt. Default: "GeoportalServer"
+        -->
+        <parameter key="bot.robotstxt.enabled" value=""/>
+        <parameter key="bot.robotstxt.override" value=""/>
+        <parameter key="bot.agent" value=""/>
+        
 
         <!-- Additional Parameters.
             - catalog.enableEditForAllPubMethods:
@@ -443,17 +455,28 @@
         <parameter key="catalog.cart.processor.whitelist" value="com.esri.gpt.control.cart.ZipXmls"/>
         <parameter key="catalog.cart.xslt.whitelist" value=""/>
         <parameter key="catalog.cart.tryhandler.class" value=""/>
+                <!-- example of custom 'tryhandler'
+        <parameter key="catalog.cart.tryhandler.class" value="com.esri.gpt.control.cart.VolumeTryHandler"/>
+        <parameter key="catalog.cart.volumetryhandler.commaSeparatedFields" value="dcat.size"/>
+        <parameter key="catalog.cart.volumetryhandler.max" value="100000"/>
+        -->
+        
 
         <!-- Mapping file to map dcat fields to lucene index fields -->
         <parameter key="dcat.mappings" value="gpt/metadata/dcat-mappings.xml"/>
         <!-- DCAT cache directory -->
-        <parameter key="dcat.cache.path" value="D:/Public/Server/tomcat7042/webapps/metadata"/>
+        <parameter key="dcat.cache.path" value="D:/Public/Server/tomcat7/webapps/metadata"/>
 	<parameter key="dcat.landingPage.default.details" value="true"/>
 	<parameter key="dcat.rights.writeAlways" value="true"/>
             
 	<parameter key="catalog.useCollections" value="false"/>
 	<parameter key="lucene.maxrecords.threshold" value="10000"/>
     </catalog>
+        <!-- customization of web harvester -->
+    <!--webharvester>
+		<dataProcessorFactory enabled="true" className="com.esri.gpt.control.webharvest.extensions.localfolder.LocalFolderDataProcessorFactory" name="localfolder" rootFolder="c:\data"/>
+    </webharvester-->
+    
     
     <!-- Download data configuration.
         - taskUrl: geoprocessing task URL
@@ -523,6 +546,25 @@
             </roles>
         </simpleAdapter>-->
 	
+					<!-- 
+					Identity adapter when using ArcGIS Online or Portal as the identity store.
+					appId: application id (Geoportal app registered at ArcGIS Online or Portal)
+					authorizeUrl: OAuth2 authorize url (e.g. https://myorg.maps.arcgis.com/sharing/oauth2/authorize)
+					expirationMinutes: token expiration minutes 
+					gptAdministratorsGroupId: group id for Geoportal administrators (optional)
+					gptPublishersGroupId: group id for Geoportal publishers (optional)
+					allUsersCanPublish: true or false, if true all authenticated users can publish items to Geoportal
+				-->
+				<!-- 
+        <arcgisPortalAdapter
+        	appId=""
+        	authorizeUrl=""
+        	expirationMinutes="120"
+        	gptAdministratorsGroupId=""
+        	gptPublishersGroupId=""
+          allUsersCanPublish="true"
+        />
+        -->
 	
          
 	 
@@ -535,7 +577,7 @@
               securityProtocol="SSLv3">
               <ldapServiceAccount
                   securityPrincipal="cn=gdg__prod,cn=users,dc=epa,dc=gov"
-                  securityCredentials="csoUGK2U"
+                  securityCredentials="VrXV4hub"
                   encrypted="false"
                   catalogAdminDN="cn=gdg_admin,cn=users,dc=epa,dc=gov"/>
           </ldapConnectionProperties>
@@ -587,6 +629,7 @@
                   <attribute key="email"        ldapName="mail"/>
                   <attribute key="firstName"    ldapName="givenName"/>
                   <attribute key="lastName"     ldapName="sn"/>
+                  <attribute key="displayName"  ldapName="displayName"/>
                   <attribute key="organization" ldapName="o"/>
                   <attribute key="affiliation"  ldapName="businessCategory"/>
                   <attribute key="street"       ldapName="street"/>
@@ -688,6 +731,33 @@
           name="OAR-OTAQ"
           groupDN="cn=GDG-OAR-OTAQ,cn=GIS,cn=Groups,dc=epa,dc=gov"/>
 	<metadataManagementGroup
+          name="OLEM"
+          groupDN="cn=GDG-OLEM,cn=GIS,cn=Groups,dc=epa,dc=gov"/>
+	<metadataManagementGroup
+          name="OLEM-CPA"
+          groupDN="cn=GDG-OLEM-CPA,cn=GIS,cn=Groups,dc=epa,dc=gov"/>
+	<metadataManagementGroup
+          name="OLEM-FFRRO"
+          groupDN="cn=GDG-OLEM-FFRRO,cn=GIS,cn=Groups,dc=epa,dc=gov"/>
+	<metadataManagementGroup
+          name="OLEM-OBLR"
+          groupDN="cn=GDG-OLEM-OBLR,cn=GIS,cn=Groups,dc=epa,dc=gov"/>
+	<metadataManagementGroup
+          name="OLEM-OEM"
+          groupDN="cn=GDG-OLEM-OEM,cn=GIS,cn=Groups,dc=epa,dc=gov"/>
+	<metadataManagementGroup
+          name="OLEM-OPM"
+          groupDN="cn=GDG-OLEM-OPM,cn=GIS,cn=Groups,dc=epa,dc=gov"/>
+	<metadataManagementGroup
+          name="OLEM-ORCR"
+          groupDN="cn=GDG-OLEM-ORCR,cn=GIS,cn=Groups,dc=epa,dc=gov"/>
+	<metadataManagementGroup
+          name="OLEM-OSRTI"
+          groupDN="cn=GDG-OLEM-OSRTI,cn=GIS,cn=Groups,dc=epa,dc=gov"/>
+	<metadataManagementGroup
+          name="OLEM-OUST"
+          groupDN="cn=GDG-OLEM-OUST,cn=GIS,cn=Groups,dc=epa,dc=gov"/>
+	<metadataManagementGroup
           name="OSWER-OBLR"
           groupDN="cn=GDG-OSWER-OBLR,cn=GIS,cn=Groups,dc=epa,dc=gov"/>		
         <metadataManagementGroup
@@ -727,10 +797,10 @@
     <!-- Scheduled Background Threads -->
     <scheduler active="true" corePoolSize="0">
         <!-- Catalog synchronization (sync Lucene index with the database) -->
-        <thread class="com.esri.gpt.catalog.context.CatalogSynchronizer" at="18:25"/>
+        <thread class="com.esri.gpt.catalog.context.CatalogSynchronizer" at="08:10"/>
         <!--<thread class="com.esri.gpt.catalog.context.CatalogSynchronizer" period='4[HOUR]' delay="30[SECOND]"/>-->
         <!-- Index optimization --> 
-        <thread class="com.esri.gpt.catalog.lucene.LuceneIndexOptimizer" at="00:40"/>
+        <thread class="com.esri.gpt.catalog.lucene.LuceneIndexOptimizer" at="08:30"/>
     
 <!-- Innovate's batch thread -->
       <thread class="com.innovateteam.gpt.BatchUpdateWrapper"
